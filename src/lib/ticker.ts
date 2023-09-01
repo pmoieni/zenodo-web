@@ -8,6 +8,7 @@ export class Ticker {
     private startTime = 0
     private totalTime = 0
     private callback: TickerCallback
+    private timeoutID = 0
 
     constructor(callback: TickerCallback) {
         this.callback = callback
@@ -40,8 +41,10 @@ export class Ticker {
             this.callback.fn()
 
             expected += this.callback.interval
-            setTimeout(step, Math.max(0, this.callback.interval - dt))
+            this.timeoutID = setTimeout(step, Math.max(0, this.callback.interval - dt))
         }
+
+        this.timeoutID = setTimeout(step, this.callback.interval)
     }
 
     stop() {
@@ -51,6 +54,8 @@ export class Ticker {
 
         this.isRunning = false
         this.totalTime = this.totalTime + this.elapsedSinceLastStart()
+
+        clearTimeout(this.timeoutID)
     }
 
     reset() {
@@ -58,10 +63,12 @@ export class Ticker {
 
         if (this.isRunning) {
             this.startTime = Date.now()
+            clearTimeout(this.timeoutID)
             return
         }
 
         this.startTime = 0
+
     }
 
     elapsed() {
