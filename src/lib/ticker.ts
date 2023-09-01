@@ -29,22 +29,19 @@ export class Ticker {
         this.isRunning = true
         this.startTime = Date.now()
 
-        if (this.callback) {
-            let expected = Date.now() + this.callback.interval
+        let expected = Date.now() + this.callback.interval
 
-            const step = () => {
-                const dt = Date.now() - expected
-                if (dt > this.callback.interval) {
-                    return console.error("oops, something went wrong")
-                }
-
-                this.callback.fn()
-
-                expected += this.callback.interval
-                setTimeout(step, Math.max(0, this.callback.interval - dt))
+        const step = () => {
+            const dt = Date.now() - expected
+            if (dt > this.callback.interval) {
+                return console.error("oops, something went wrong")
             }
-        }
 
+            this.callback.fn()
+
+            expected += this.callback.interval
+            setTimeout(step, Math.max(0, this.callback.interval - dt))
+        }
     }
 
     stop() {
