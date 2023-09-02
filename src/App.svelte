@@ -17,21 +17,19 @@
         set: setState,
     };
 
-    let elapsed = 0;
-
     const ticker = new Timer(
         sm,
         5000,
         1000,
         () => console.log("finished"),
-        () => console.log("callback")
+        () => console.log("callback running every 1 second")
     );
 
     ticker.start();
 </script>
 
 <main>
-    <h1>elapsed: {elapsed}</h1>
+    <h1>elapsed: {$state.elapsed}</h1>
 </main>
 
 <style>

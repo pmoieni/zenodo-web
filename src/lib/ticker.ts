@@ -1,6 +1,7 @@
 export interface State {
     isRunning: boolean
     startTime: number
+    resumeTime: number
     elapsed: number
     finished: boolean
 }
@@ -24,6 +25,7 @@ export class Timer {
         stateManager.set({
             isRunning: false,
             startTime: 0,
+            resumeTime: 0,
             elapsed: 0,
             finished: false
         })
@@ -34,7 +36,7 @@ export class Timer {
         this.callback = callback
     }
 
-    private elapsedSinceLastStart() {
+    private elapsedSinceStart() {
         const currState = this.stateManager.get()
 
         if (currState.startTime === 0) {
@@ -44,30 +46,43 @@ export class Timer {
         return Date.now() - currState.startTime
     }
 
-    start() {
+    private elapsedSinceLastResume() {
         const currState = this.stateManager.get()
 
-        if (currState.isRunning) {
-            return console.error("Ticker is already running")
+        if (currState.resumeTime === 0) {
+            return 0
         }
 
-        this.stateManager.set({
-            ...currState,
-            isRunning: true,
-            startTime: Date.now()
-        })
+        return Date.now() - currState.resumeTime
+    }
 
+    run() {
         let expected = Date.now() + this.interval
 
         const step = () => {
             const currState = this.stateManager.get()
             const now = Date.now()
 
-            console.log(now - (currState.startTime + this.duration))
+            let delta = now - expected
+
+            if (delta > this.interval) {
+                expected += this.interval * Math.floor(delta / this.interval)
+            }
+
+            this.stateManager.set({
+                ...currState,
+                elapsed: this.elapsedSinceStart()
+            })
+
+            if (this.callback) {
+                this.callback()
+            }
+
             // timer finished
             if (now - (currState.startTime + this.duration) > 0) {
                 this.stateManager.set({
-                    ...currState,
+                    // requires new state
+                    ...this.stateManager.get(),
                     isRunning: false,
                     finished: true
                 })
@@ -81,16 +96,6 @@ export class Timer {
                 return
             }
 
-            let delta = now - expected
-
-            if (delta > this.interval) {
-                expected += this.interval * Math.floor(delta / this.interval)
-            }
-
-            if (this.callback) {
-                this.callback()
-            }
-
             expected += this.interval
             this.timeoutID = setTimeout(step, Math.max(0, this.interval - delta))
         }
@@ -98,7 +103,24 @@ export class Timer {
         this.timeoutID = setTimeout(step, this.interval)
     }
 
-    stop() {
+    start() {
+        const currState = this.stateManager.get()
+
+        if (currState.isRunning) {
+            return console.error("Ticker is already running")
+        }
+
+        this.stateManager.set({
+            ...currState,
+            isRunning: true,
+            startTime: currState.startTime === 0 ? Date.now() : currState.startTime,
+            resumeTime: Date.now()
+        })
+
+        this.run()
+    }
+
+    pause() {
         const currState = this.stateManager.get()
 
         if (!currState.isRunning) {
@@ -108,7 +130,7 @@ export class Timer {
         this.stateManager.set({
             ...currState,
             isRunning: false,
-            elapsed: this.stateManager.get().elapsed + this.elapsedSinceLastStart()
+            elapsed: currState.elapsed + this.elapsedSinceLastResume()
         })
 
         clearTimeout(this.timeoutID)
@@ -132,19 +154,5 @@ export class Timer {
             newState.startTime = 0
             return newState
         })())
-    }
-
-    elapsed() {
-        const currState = this.stateManager.get()
-
-        if (currState.startTime === 0) {
-            return 0;
-        }
-
-        if (currState.isRunning) {
-            return currState.elapsed + this.elapsedSinceLastStart();
-        }
-
-        return currState.elapsed;
     }
 }
