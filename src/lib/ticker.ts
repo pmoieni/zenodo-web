@@ -1,85 +1,150 @@
-export interface TickerCallback {
-    interval: number
-    fn: Function
+export interface State {
+    isRunning: boolean
+    startTime: number
+    elapsed: number
+    finished: boolean
 }
 
-export class Ticker {
-    private isRunning = false
-    private startTime = 0
-    private totalTime = 0
-    private callback: TickerCallback
+export interface StateManager {
+    get: () => State,
+    set: (value: State) => void
+}
+
+export class Timer {
+    private stateManager: StateManager
+    private duration: number
+    private interval: number
+    private onFinish: Function | undefined
+    private callback: Function | undefined
     private timeoutID = 0
 
-    constructor(callback: TickerCallback) {
+    constructor(stateManager: StateManager, duration: number, interval: number, onFinish?: Function, callback?: Function) {
+        this.stateManager = stateManager
+
+        stateManager.set({
+            isRunning: false,
+            startTime: 0,
+            elapsed: 0,
+            finished: false
+        })
+
+        this.duration = duration
+        this.interval = interval
+        this.onFinish = onFinish
         this.callback = callback
     }
 
     private elapsedSinceLastStart() {
-        if (this.startTime === 0) {
+        const currState = this.stateManager.get()
+
+        if (currState.startTime === 0) {
             return 0
         }
 
-        return Date.now() - this.startTime
+        return Date.now() - currState.startTime
     }
 
     start() {
-        if (this.isRunning) {
+        const currState = this.stateManager.get()
+
+        if (currState.isRunning) {
             return console.error("Ticker is already running")
         }
 
-        this.isRunning = true
-        this.startTime = Date.now()
+        this.stateManager.set({
+            ...currState,
+            isRunning: true,
+            startTime: Date.now()
+        })
 
-        let expected = Date.now() + this.callback.interval
+        let expected = Date.now() + this.interval
 
         const step = () => {
-            const dt = Date.now() - expected
-            if (dt > this.callback.interval) {
-                return console.error("oops, something went wrong")
+            const currState = this.stateManager.get()
+            const now = Date.now()
+
+            console.log(now - (currState.startTime + this.duration))
+            // timer finished
+            if (now - (currState.startTime + this.duration) > 0) {
+                this.stateManager.set({
+                    ...currState,
+                    isRunning: false,
+                    finished: true
+                })
+
+                clearTimeout(this.timeoutID)
+
+                if (this.onFinish) {
+                    this.onFinish()
+                }
+
+                return
             }
 
-            this.callback.fn()
+            let delta = now - expected
 
-            expected += this.callback.interval
-            this.timeoutID = setTimeout(step, Math.max(0, this.callback.interval - dt))
+            if (delta > this.interval) {
+                expected += this.interval * Math.floor(delta / this.interval)
+            }
+
+            if (this.callback) {
+                this.callback()
+            }
+
+            expected += this.interval
+            this.timeoutID = setTimeout(step, Math.max(0, this.interval - delta))
         }
 
-        this.timeoutID = setTimeout(step, this.callback.interval)
+        this.timeoutID = setTimeout(step, this.interval)
     }
 
     stop() {
-        if (!this.isRunning) {
+        const currState = this.stateManager.get()
+
+        if (!currState.isRunning) {
             return console.error("Ticker is already stopped")
         }
 
-        this.isRunning = false
-        this.totalTime = this.totalTime + this.elapsedSinceLastStart()
+        this.stateManager.set({
+            ...currState,
+            isRunning: false,
+            elapsed: this.stateManager.get().elapsed + this.elapsedSinceLastStart()
+        })
 
         clearTimeout(this.timeoutID)
     }
 
     reset() {
-        this.totalTime = 0
+        const currState = this.stateManager.get()
 
-        if (this.isRunning) {
-            this.startTime = Date.now()
-            clearTimeout(this.timeoutID)
-            return
-        }
+        this.stateManager.set(((): State => {
+            const newState = {
+                ...currState,
+                totalTime: 0
+            }
 
-        this.startTime = 0
+            if (currState.isRunning) {
+                newState.startTime = Date.now()
+                clearTimeout(this.timeoutID)
+                return newState
+            }
 
+            newState.startTime = 0
+            return newState
+        })())
     }
 
     elapsed() {
-        if (this.startTime === 0) {
+        const currState = this.stateManager.get()
+
+        if (currState.startTime === 0) {
             return 0;
         }
 
-        if (this.isRunning) {
-            return this.totalTime + this.elapsedSinceLastStart();
+        if (currState.isRunning) {
+            return currState.elapsed + this.elapsedSinceLastStart();
         }
 
-        return this.totalTime;
+        return currState.elapsed;
     }
 }
