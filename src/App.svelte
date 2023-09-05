@@ -10,7 +10,7 @@
 <style lang="postcss">
     @font-face {
         font-family: Inter;
-        src: url("fonts/Inter-Regular.ttf");
+        src: url(./assets/fonts/Inter-Regular.ttf);
     }
 
     @font-face {
@@ -21,7 +21,7 @@
 
     @font-face {
         font-family: Inter;
-        src: url("fonts/DejaVuSans-Bold.ttf");
+        src: url(./assets/fonts/Inter-Bold.ttf);
         font-weight: bold;
     }
 
