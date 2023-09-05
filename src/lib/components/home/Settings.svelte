@@ -9,7 +9,7 @@
 
 <Modal open={$appState.settingsOpen}>
     <div
-        class="p-4 rounded-md bg-zinc-200 dark:bg-zinc-800 flex flex-col items-center justify-start">
+        class="w-full h-full overflow-auto p-4 flex flex-col items-center justify-start">
         <div class="w-full flex flex-col items-start justify-start">
             <h1
                 class="font-bold text-2xl text-gray-800 dark:text-gray-200 mt-4 mb-4">
@@ -24,17 +24,17 @@
                         name="hours"
                         bind:value={$settingsState.sessionDuration.hours}
                         example={2}
-                        classes="w-16 md:w-20 lg:w-24" />
+                        classes="w-20 md:w-24 lg:w-28" />
                     <NumberInput
                         name="minutes"
                         bind:value={$settingsState.sessionDuration.minutes}
                         example={25}
-                        classes="w-16 md:w-20 lg:w-24" />
+                        classes="w-20 md:w-24 lg:w-28" />
                     <NumberInput
                         name="seconds"
                         bind:value={$settingsState.sessionDuration.seconds}
                         example={10}
-                        classes="w-16 md:w-20 lg:w-24" />
+                        classes="w-20 md:w-24 lg:w-28" />
                 </div>
             </div>
         </div>
@@ -47,17 +47,17 @@
                     name="hours"
                     bind:value={$settingsState.breakDuration.hours}
                     example={2}
-                    classes="w-16 md:w-20 lg:w-24" />
+                    classes="w-20 md:w-24 lg:w-28" />
                 <NumberInput
                     name="minutes"
                     bind:value={$settingsState.breakDuration.minutes}
                     example={25}
-                    classes="w-16 md:w-20 lg:w-24" />
+                    classes="w-20 md:w-24 lg:w-28" />
                 <NumberInput
                     name="seconds"
                     bind:value={$settingsState.breakDuration.seconds}
                     example={10}
-                    classes="w-16 md:w-20 lg:w-24" />
+                    classes="w-20 md:w-24 lg:w-28" />
             </div>
         </div>
         <div class="w-full flex flex-col items-start justify-start mb-4 mt-4">
@@ -69,7 +69,7 @@
                     name="count"
                     options={[3, 5, 10]}
                     bind:value={$settingsState.sessionCount}
-                    classes="w-16 md:w-20 lg:w-24" />
+                    classes="w-20 md:w-24 lg:w-28" />
             </div>
         </div>
         <div class="w-full flex flex-col items-start justify-start mb-4 mt-4">
