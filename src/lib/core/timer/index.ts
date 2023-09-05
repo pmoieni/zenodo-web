@@ -21,7 +21,7 @@ export class Timer {
     private interval: number;
     private callback: Callback;
     private onFinish: OnFinish | undefined;
-    private timeoutID = 0;
+    private timeoutID = -1;
 
     constructor(
         duration: number,
@@ -81,7 +81,7 @@ export class Timer {
             this.state.elapsed = this.elapsedSinceStart();
 
             expected += this.interval;
-            this.timeoutID = setTimeout(
+            this.timeoutID = window.setTimeout(
                 step,
                 Math.max(0, this.interval - delta)
             );
@@ -89,7 +89,7 @@ export class Timer {
             this.callback(this.state);
         };
 
-        this.timeoutID = setTimeout(step, this.interval);
+        this.timeoutID = window.setTimeout(step, this.interval);
     }
 
     start() {
@@ -116,13 +116,13 @@ export class Timer {
         this.state.isRunning = false;
         this.state.elapsed = this.state.elapsed + this.elapsedSinceLastResume();
 
-        clearTimeout(this.timeoutID);
+        window.clearTimeout(this.timeoutID);
 
         this.callback(this.state);
     }
 
     reset() {
-        clearTimeout(this.timeoutID);
+        window.clearTimeout(this.timeoutID);
 
         this.state = {
             isRunning: false,

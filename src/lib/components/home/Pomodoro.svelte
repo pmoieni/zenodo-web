@@ -4,7 +4,6 @@
     import { settingsState, type Duration } from "../../store/settings";
     import { pomodoroState } from "../../store/pomodoro";
     import IconButton from "../IconButton.svelte";
-    import { appState } from "../../store/app";
 
     export let radius: number;
     export let stroke: number;

@@ -2,7 +2,6 @@
     import Pomodoro from "../components/home/Pomodoro.svelte";
     import { appState } from "../store/app";
     import Settings from "../components/home/Settings.svelte";
-    import Icon from "../components/Icon.svelte";
     import { Icons } from "../../assets/icons";
     import Page from "../components/Page.svelte";
     import IconButton from "../components/IconButton.svelte";
