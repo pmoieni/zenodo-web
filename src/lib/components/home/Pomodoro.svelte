@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Icons } from "../../../assets/icons";
-    import { Timer, type TimerState } from "../../core/timer";
+    import { Timer, TimerTickEvent, type TimerState } from "../../core/timer";
     import { settingsState, type Duration } from "../../store/settings";
     import { pomodoroState } from "../../store/pomodoro";
     import IconButton from "../IconButton.svelte";
@@ -45,13 +45,17 @@
         );
     }
 
-    function timerCallback(state: TimerState) {
+    function onTimerTick(state: TimerState) {
         $pomodoroState.timer = state;
     }
 
     let duration = getMilliseconds($settingsState.sessionDuration);
 
-    const timer = new Timer(duration, 1 * 1000, timerCallback);
+    const timer = new Timer(duration, 1 * 1000);
+
+    timer.addEventListener(TimerTickEvent.type, (event: Event) =>
+        onTimerTick((event as TimerTickEvent).detail)
+    );
 
     settingsState.subscribe((v) => {
         duration = getMilliseconds(v.sessionDuration);
