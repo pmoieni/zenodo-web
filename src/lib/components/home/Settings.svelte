@@ -2,12 +2,12 @@
     import { appState } from "../../store/app";
     import { settingsState } from "../../store/settings";
     import Modal from "../Modal.svelte";
-    import NumberInput from "./settings/NumberInput.svelte";
-    import Select from "./settings/Select.svelte";
-    import ToggleButton from "./settings/ToggleButton.svelte";
+    import NumberInput from "../NumberInput.svelte";
+    import Select from "../Select.svelte";
+    import ToggleButton from "../ToggleButton.svelte";
 </script>
 
-<Modal open={$appState.settingsOpen}>
+<Modal open={$appState.windows.settingsOpen}>
     <div
         class="w-full h-full overflow-auto p-4 flex flex-col items-center justify-start">
         <div class="w-full flex flex-col items-start justify-start">

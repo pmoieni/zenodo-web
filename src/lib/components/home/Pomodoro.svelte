@@ -1,55 +1,19 @@
 <script lang="ts">
     import { Icons } from "../../../assets/icons";
     import { Timer, TimerTickEvent, type TimerState } from "../../core/timer";
-    import { settingsState, type Duration } from "../../store/settings";
+    import { settingsState } from "../../store/settings";
     import { pomodoroState } from "../../store/pomodoro";
     import IconButton from "../IconButton.svelte";
+    import { Duration } from "../../types";
 
     export let radius: number;
     export let stroke: number;
-
-    function getMilliseconds(duration: Duration): number {
-        return (
-            (duration.hours * 60 * 60 +
-                duration.minutes * 60 +
-                duration.seconds) *
-            1000
-        );
-    }
-
-    function parseMilliseconds(ms: number) {
-        if (ms <= 0) {
-            return "00s";
-        }
-
-        // get hours from milliseconds
-        const hours = ms / (1000 * 60 * 60);
-        const absoluteHours = Math.floor(hours);
-        const h = absoluteHours > 9 ? absoluteHours : "0" + absoluteHours;
-
-        // get remainder from hours and convert to minutes
-        const minutes = (hours - absoluteHours) * 60;
-        const absoluteMinutes = Math.floor(minutes);
-        const m = absoluteMinutes > 9 ? absoluteMinutes : "0" + absoluteMinutes;
-
-        // get remainder from minutes and convert to seconds
-        const seconds = (minutes - absoluteMinutes) * 60;
-        const absoluteSeconds = Math.floor(seconds);
-        const s = absoluteSeconds > 9 ? absoluteSeconds : "0" + absoluteSeconds;
-
-        return (
-            (h === "00" ? "" : h + "h ") +
-            (m === "00" ? "" : m + "m ") +
-            s +
-            "s"
-        );
-    }
 
     function onTimerTick(state: TimerState) {
         $pomodoroState.timer = state;
     }
 
-    let duration = getMilliseconds($settingsState.sessionDuration);
+    let duration = $settingsState.sessionDuration.getMilliseconds();
 
     const timer = new Timer(duration, 1 * 1000);
 
@@ -58,7 +22,7 @@
     );
 
     settingsState.subscribe((v) => {
-        duration = getMilliseconds(v.sessionDuration);
+        duration = v.sessionDuration.getMilliseconds();
         timer.setDuration(duration);
     });
 
@@ -84,7 +48,7 @@
 
     // remove the trailing milliseconds which are not required to display
     $: fixedElapsed = Math.floor($pomodoroState.timer.elapsed / 100) * 100;
-    $: displayTime = parseMilliseconds(duration - fixedElapsed);
+    $: displayTime = Duration.parseMilliseconds(duration - fixedElapsed);
 </script>
 
 <div class="flex items-center justify-center flex-col gap-8 w-full h-full">

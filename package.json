@@ -15,25 +15,25 @@
     "prelint": "npm run format"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^2.4.2",
+    "@sveltejs/vite-plugin-svelte": "^2.4.6",
     "@tsconfig/svelte": "^5.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.5.0",
-    "@typescript-eslint/parser": "^6.5.0",
-    "autoprefixer": "^10.4.15",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "autoprefixer": "^10.4.16",
     "cssnano": "^6.0.1",
-    "eslint": "^8.48.0",
-    "eslint-plugin-svelte3": "^4.0.0",
-    "postcss": "^8.4.29",
+    "eslint": "^8.51.0",
+    "eslint-plugin-svelte": "^2.34.0",
+    "postcss": "^8.4.31",
     "prettier": "^3.0.3",
     "prettier-plugin-svelte": "^3.0.3",
-    "sass": "^1.66.1",
-    "svelte": "^4.0.5",
-    "svelte-check": "^3.4.6",
+    "sass": "^1.69.4",
+    "svelte": "^4.2.1",
+    "svelte-check": "^3.5.2",
     "tailwindcss": "^3.3.3",
     "tslib": "^2.6.0",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "vite-plugin-pwa": "^0.16.4"
+    "vite": "^4.5.0",
+    "vite-plugin-pwa": "^0.16.5"
   },
   "dependencies": {}
 }

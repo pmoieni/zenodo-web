@@ -109,11 +109,13 @@ class Timer extends EventTarget {
         this.timeoutID = window.setTimeout(step, this.interval);
     }
 
-    start() {
+    start(): void {
         if (this.state.isRunning) {
-            return this.dispatchEvent(
+            this.dispatchEvent(
                 new TimerErrorEvent(new Error("Ticker is already running"))
             );
+
+            return
         }
 
         this.state = {
@@ -127,11 +129,13 @@ class Timer extends EventTarget {
         this.run();
     }
 
-    pause() {
+    pause(): void {
         if (!this.state.isRunning) {
-            return this.dispatchEvent(
+            this.dispatchEvent(
                 new TimerErrorEvent(new Error("Ticker is already stopped"))
             );
+
+            return
         }
 
         this.state.isRunning = false;
@@ -142,7 +146,7 @@ class Timer extends EventTarget {
         this.dispatchEvent(new TimerTickEvent(this.state));
     }
 
-    reset() {
+    reset(): void {
         window.clearTimeout(this.timeoutID);
 
         this.state = {

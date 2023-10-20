@@ -3,7 +3,7 @@
     export let options: any[] = [];
     export let display = (o: any) => o;
     export let value: any;
-    export let classes: string;
+    export let classes = "";
 </script>
 
 <div class="group relative {classes}">

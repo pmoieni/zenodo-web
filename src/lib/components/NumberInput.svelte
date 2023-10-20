@@ -2,7 +2,7 @@
     export let name: string;
     export let value: number;
     export let example: number;
-    export let classes: string;
+    export let classes: string = "";
 </script>
 
 <div class="group relative {classes}">

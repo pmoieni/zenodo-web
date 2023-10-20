@@ -1,38 +1,25 @@
 import { createStorage } from ".";
-
-export interface Duration {
-    hours: number;
-    minutes: number;
-    seconds: number;
-}
+import { Duration } from "../types";
 
 export interface SettingsState {
-    sessionDuration: Duration;
-    breakDuration: Duration;
-    sessionCount: number;
-    autoStartSession: boolean;
-    autoStartBreak: boolean;
-    darkTheme: boolean;
+	sessionDuration: Duration;
+	breakDuration: Duration;
+	sessionCount: number;
+	autoStartSession: boolean;
+	autoStartBreak: boolean;
+	darkTheme: boolean;
 }
 
 function getOSTheme(): boolean {
-    const prefersDarkMq = window.matchMedia("(prefers-color-scheme: dark)");
-    return prefersDarkMq.matches ? true : false;
+	const prefersDarkMq = window.matchMedia("(prefers-color-scheme: dark)");
+	return prefersDarkMq.matches ? true : false;
 }
 
 export const settingsState = createStorage("SETTINGS_STORE", {
-    sessionDuration: {
-        hours: 0,
-        minutes: 25,
-        seconds: 0,
-    },
-    breakDuration: {
-        hours: 0,
-        minutes: 5,
-        seconds: 0,
-    },
-    sessionCount: 3,
-    autoStartSession: false,
-    autoStartBreak: false,
-    darkTheme: getOSTheme(),
+	sessionDuration: new Duration(0, 25, 0),
+	breakDuration: new Duration(0, 5, 0),
+	sessionCount: 3,
+	autoStartSession: false,
+	autoStartBreak: false,
+	darkTheme: getOSTheme(),
 });
