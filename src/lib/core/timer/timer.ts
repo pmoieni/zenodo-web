@@ -13,7 +13,7 @@ const timerDefaultState = {
 };
 
 class TimerFinishEvent extends CustomEvent<TimerState> {
-    static type: "timerfinish" = "timerfinish";
+    static type: string = "timerfinish";
 
     constructor(detail: TimerState) {
         super(TimerFinishEvent.type, { detail });
@@ -21,7 +21,7 @@ class TimerFinishEvent extends CustomEvent<TimerState> {
 }
 
 class TimerTickEvent extends CustomEvent<TimerState> {
-    static type: "timertick" = "timertick";
+    static type: string = "timertick";
 
     constructor(detail: TimerState) {
         super(TimerTickEvent.type, { detail });
@@ -29,7 +29,7 @@ class TimerTickEvent extends CustomEvent<TimerState> {
 }
 
 class TimerErrorEvent extends CustomEvent<Error> {
-    static type: "timererror" = "timererror";
+    static type: string = "timererror";
 
     constructor(detail: Error) {
         super(TimerErrorEvent.type, { detail });
@@ -37,91 +37,94 @@ class TimerErrorEvent extends CustomEvent<Error> {
 }
 
 class Timer extends EventTarget {
-    private state: TimerState = timerDefaultState;
-    private duration: number;
-    private interval: number;
-    private timeoutID = -1;
+    private _state: TimerState = timerDefaultState;
+    private _duration: number = 0; // timer duration in milliseconds
+    private _interval: number; // tick event interval in milliseconds
+    private _timeoutID = -1;
 
-    constructor(duration: number, interval: number) {
+    constructor(interval: number) {
         super();
 
-        this.duration = duration;
-        this.interval = interval;
-
-        // initialize WASM module
+        this._interval = interval;
     }
 
-    setDuration(duration: number) {
-        this.duration = duration;
+    public set duration(duration: number) {
+        this._duration = duration;
+    }
+
+    public get duration() {
+        return this._duration;
     }
 
     setInterval(interval: number) {
-        this.interval = interval;
+        this._interval = interval;
     }
 
     private elapsedSinceStart() {
-        if (this.state.startTime === -1) {
+        if (this._state.startTime === -1) {
             return 0;
         }
 
-        return Date.now() - this.state.startTime;
+        return Date.now() - this._state.startTime;
     }
 
     private elapsedSinceLastResume() {
-        if (this.state.resumeTime === -1) {
+        if (this._state.resumeTime === -1) {
             return 0;
         }
 
-        return Date.now() - this.state.resumeTime;
+        return Date.now() - this._state.resumeTime;
     }
 
     run() {
-        let expected = Date.now() + this.interval;
+        let expected = Date.now() + this._interval;
 
         const step = () => {
             const now = Date.now();
 
             // timer finished
-            if (now - (this.state.startTime + this.duration) >= 0) {
+            if (now - (this._state.startTime + this._duration) >= 0) {
                 this.reset();
 
-                this.dispatchEvent(new TimerFinishEvent(this.state));
+                this.dispatchEvent(new TimerFinishEvent(this._state));
                 return;
             }
 
             const delta = now - expected;
 
-            if (delta > this.interval) {
-                expected += this.interval * Math.floor(delta / this.interval);
+            if (delta > this._interval) {
+                expected += this._interval * Math.floor(delta / this._interval);
             }
 
-            this.state.elapsed = this.elapsedSinceStart();
+            this._state.elapsed = this.elapsedSinceStart();
 
-            expected += this.interval;
-            this.timeoutID = window.setTimeout(
+            expected += this._interval;
+            this._timeoutID = window.setTimeout(
                 step,
-                Math.max(0, this.interval - delta)
+                Math.max(0, this._interval - delta)
             );
 
-            this.dispatchEvent(new TimerTickEvent(this.state));
+            this.dispatchEvent(new TimerTickEvent(this._state));
         };
 
-        this.timeoutID = window.setTimeout(step, this.interval);
+        this._timeoutID = window.setTimeout(step, this._interval);
     }
 
     start(): void {
-        if (this.state.isRunning) {
+        if (this._state.isRunning) {
             this.dispatchEvent(
                 new TimerErrorEvent(new Error("Ticker is already running"))
             );
 
-            return
+            return;
         }
 
-        this.state = {
+        this._state = {
             isRunning: true,
             startTime:
-                this.state.startTime === -1 ? Date.now() : this.state.startTime,
+                this._state.startTime === -1
+                    ? Date.now()
+                    : this._state.startTime,
             resumeTime: Date.now(),
             elapsed: 0,
         };
@@ -130,33 +133,36 @@ class Timer extends EventTarget {
     }
 
     pause(): void {
-        if (!this.state.isRunning) {
+        if (!this._state.isRunning) {
             this.dispatchEvent(
                 new TimerErrorEvent(new Error("Ticker is already stopped"))
             );
 
-            return
+            return;
         }
 
-        this.state.isRunning = false;
-        this.state.elapsed = this.state.elapsed + this.elapsedSinceLastResume();
+        this._state.isRunning = false;
+        this._state.elapsed =
+            this._state.elapsed + this.elapsedSinceLastResume();
 
-        window.clearTimeout(this.timeoutID);
+        window.clearTimeout(this._timeoutID);
 
-        this.dispatchEvent(new TimerTickEvent(this.state));
+        this.dispatchEvent(new TimerTickEvent(this._state));
     }
 
     reset(): void {
-        window.clearTimeout(this.timeoutID);
+        window.clearTimeout(this._timeoutID);
 
-        this.state = {
+        this._state = {
             isRunning: false,
             elapsed: 0,
             startTime: -1,
             resumeTime: -1,
         };
 
-        this.dispatchEvent(new TimerTickEvent(this.state));
+        this._duration = 0;
+
+        this.dispatchEvent(new TimerTickEvent(this._state));
     }
 }
 

@@ -1,54 +1,125 @@
 <script lang="ts">
     import { Icons } from "../../../assets/icons";
-    import { Timer, TimerTickEvent, type TimerState } from "../../core/timer";
-    import { settingsState } from "../../store/settings";
-    import { pomodoroState } from "../../store/pomodoro";
     import IconButton from "../IconButton.svelte";
-    import { Duration } from "../../types";
+    import { pomodoroState } from "../../store/pomodoro";
+    import { settingsState } from "../../store/settings";
+    import { Timer, TimerFinishEvent, TimerTickEvent } from "../../core/timer";
+    import { TaskType } from "../../types";
 
     export let radius: number;
     export let stroke: number;
 
-    function onTimerTick(state: TimerState) {
-        $pomodoroState.timer = state;
+    let finished = true;
+    let paused = true;
+    let timerDuration: number = 0;
+    let timerElapsed: number = 0;
+
+    $: disableToggler =
+        (finished && $pomodoroState.tasks.length == 0) ||
+        (!finished && !$pomodoroState.tasks[0].pausable);
+
+    // TODO: add reset event to timer
+
+    function handleTimerTick(e: Event) {
+        timerElapsed = (e as TimerTickEvent).detail.elapsed;
     }
 
-    let duration = $settingsState.sessionDuration.getMilliseconds();
+    function handleTimerFinish() {
+        $pomodoroState.tasks.shift();
+        $pomodoroState = $pomodoroState;
 
-    const timer = new Timer(duration, 1 * 1000);
+        if ($pomodoroState.tasks.length == 0) {
+            finished = true;
+            paused = true;
+            timer.reset();
+            timerDuration = timer.duration;
+            return;
+        }
 
-    timer.addEventListener(TimerTickEvent.type, (event: Event) =>
-        onTimerTick((event as TimerTickEvent).detail)
-    );
+        timer.reset();
+        timer.duration = $pomodoroState.tasks[0].duration;
+        timerDuration = timer.duration;
 
-    settingsState.subscribe((v) => {
-        duration = v.sessionDuration.getMilliseconds();
-        timer.setDuration(duration);
-    });
+        switch ($pomodoroState.tasks[0].typ) {
+            case TaskType.WORK:
+                $settingsState.autoStartSession ?? timer.start();
+                break;
+            case TaskType.BREAK:
+                $settingsState.autoStartBreak ?? timer.start();
+                break;
+        }
+    }
+
+    let timer = new Timer(1 * 1000);
+    timer.addEventListener(TimerTickEvent.type, handleTimerTick);
+    timer.addEventListener(TimerFinishEvent.type, handleTimerFinish);
+
+    function toggleSession() {
+        if (finished && $pomodoroState.tasks.length > 0) {
+            timer.duration = $pomodoroState.tasks[0].duration;
+            timerDuration = timer.duration;
+            finished = false;
+            paused = false;
+            timer.start();
+            return;
+        }
+
+        if (paused) {
+            timer.start();
+            paused = false;
+            return;
+        }
+
+        if ($pomodoroState.tasks[0].pausable) {
+            timer.pause();
+            paused = true;
+        }
+    }
+
+    function cancelTask() {
+        paused = true;
+        timer.reset();
+        timer.duration = $pomodoroState.tasks[0].duration;
+        timerDuration = timer.duration;
+    }
 
     $: normalizedRadius = radius - stroke * 2;
     $: circumference = normalizedRadius * 2 * Math.PI;
     $: strokeDashOffset =
-        circumference -
-        ((($pomodoroState.timer.elapsed / duration) * 100) / 100) *
-            circumference;
+        timerDuration > 0
+            ? circumference -
+              (((timerElapsed / timerDuration) * 100) / 100) * circumference
+            : 0;
 
-    function toggleTimer() {
-        if ($pomodoroState.timer.isRunning) {
-            timer.pause();
-            return;
+    function getDisplayTime(ms: number) {
+        if (timerDuration == 0 || ms <= 0) {
+            return "--";
         }
 
-        timer.start();
-    }
+        // get hours from minutes
+        const hours = ms / (60 * 60 * 1000);
+        const absoluteHours = Math.floor(hours);
+        const h = absoluteHours > 9 ? absoluteHours : "0" + absoluteHours;
 
-    function resetTimer() {
-        timer.reset();
+        // get remainder from hours and convert to minutes
+        const minutes = (hours - absoluteHours) * 60;
+        const absoluteMinutes = Math.floor(minutes);
+        const m = absoluteMinutes > 9 ? absoluteMinutes : "0" + absoluteMinutes;
+
+        const seconds = (minutes - absoluteMinutes) * 60;
+        const absoluteSeconds = Math.floor(seconds);
+        const s = absoluteSeconds > 9 ? absoluteSeconds : "0" + absoluteSeconds;
+
+        return (
+            (h === "00" ? "" : h + "h ") +
+            (m === "00" ? "" : m + "m ") +
+            (s === "00" ? "" : s + "s ")
+        );
     }
 
     // remove the trailing milliseconds which are not required to display
-    $: fixedElapsed = Math.floor($pomodoroState.timer.elapsed / 100) * 100;
-    $: displayTime = Duration.parseMilliseconds(duration - fixedElapsed);
+    $: fixedElapsed = Math.floor(timerElapsed / 100) * 100;
+    $: display = getDisplayTime(timerDuration - fixedElapsed);
 </script>
 
 <div class="flex items-center justify-center flex-col gap-8 w-full h-full">
@@ -69,15 +140,16 @@
         </svg>
         <p
             class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold text-gray-700 dark:text-gray-300">
-            {displayTime}
+            {display}
         </p>
     </div>
     <div class="flex items-center gap-8">
         <IconButton
-            on:click={toggleTimer}
-            icon={$pomodoroState.timer.isRunning ? Icons.pause : Icons.play} />
+            disabled={disableToggler}
+            on:click={toggleSession}
+            icon={paused ? Icons.play : Icons.pause} />
         <IconButton
-            on:click={resetTimer}
-            icon={Icons.stop} />
+            on:click={cancelTask}
+            icon={Icons.cancel} />
     </div>
 </div>

@@ -1,10 +1,10 @@
-import { timerDefaultState, type TimerState } from "../core/timer";
 import { writable } from "svelte/store";
+import type { Task } from "../types";
 
 export interface PomodoroState {
-    timer: TimerState;
+    tasks: Task[];
 }
 
 export const pomodoroState = writable<PomodoroState>({
-    timer: timerDefaultState,
+    tasks: [],
 });

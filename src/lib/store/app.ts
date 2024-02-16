@@ -1,19 +1,15 @@
 import { writable } from "svelte/store";
-import type { Task } from "../core/session";
 
 export interface AppState {
-	windows: {
-		settingsOpen: boolean;
-		newTaskModalOpen: boolean;
-	},
-	tasks: Task[],
+    windows: {
+        settingsOpen: boolean;
+        newTaskModalOpen: boolean;
+    };
 }
 
-
 export const appState = writable<AppState>({
-	windows: {
-		settingsOpen: false,
-		newTaskModalOpen: false,
-	},
-	tasks: [],
+    windows: {
+        settingsOpen: false,
+        newTaskModalOpen: false,
+    },
 });
