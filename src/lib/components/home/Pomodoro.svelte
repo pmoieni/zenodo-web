@@ -1,102 +1,107 @@
 <script lang="ts">
     import { Icons } from "../../../assets/icons";
     import IconButton from "../IconButton.svelte";
-    import { pomodoroState } from "../../store/pomodoro";
+    import { taskQueue } from "../../store/pomodoro";
     import { settingsState } from "../../store/settings";
-    import { Timer, TimerFinishEvent, TimerTickEvent } from "../../core/timer";
+    import { TimerFinishEvent, TimerTickEvent } from "../../core/timer";
     import { TaskType } from "../../types";
 
     export let radius: number;
     export let stroke: number;
 
-    let finished = true;
     let paused = true;
-    let timerDuration: number = 0;
-    let timerElapsed: number = 0;
+    let timerElapsed = 0;
 
     $: disableToggler =
-        (finished && $pomodoroState.tasks.length == 0) ||
-        (!finished && !$pomodoroState.tasks[0].pausable);
+        $taskQueue.length == 0 || (!paused && !$taskQueue[0].pausable);
 
-    // TODO: add reset event to timer
+    $: normalizedRadius = radius - stroke * 2;
+    $: circumference = normalizedRadius * 2 * Math.PI;
+    let strokeDashOffset = 0;
 
     function handleTimerTick(e: Event) {
-        timerElapsed = (e as TimerTickEvent).detail.elapsed;
+        const timerEvent = e as TimerTickEvent;
+        timerElapsed = timerEvent.detail.elapsed;
+        strokeDashOffset =
+            circumference -
+            (((timerEvent.detail.elapsed / $taskQueue[0].duration) * 100) /
+                100) *
+                circumference;
     }
 
     function handleTimerFinish() {
-        $pomodoroState.tasks.shift();
-        $pomodoroState = $pomodoroState;
+        $taskQueue[0].timer.removeEventListener(
+            TimerTickEvent.type,
+            handleTimerTick,
+            false
+        );
+        $taskQueue[0].timer.removeEventListener(
+            TimerFinishEvent.type,
+            handleTimerFinish,
+            false
+        );
 
-        if ($pomodoroState.tasks.length == 0) {
-            finished = true;
+        $taskQueue.shift();
+        $taskQueue = $taskQueue;
+
+        if ($taskQueue.length == 0) {
             paused = true;
-            timer.reset();
-            timerDuration = timer.duration;
             return;
         }
 
-        timer.reset();
-        timer.duration = $pomodoroState.tasks[0].duration;
-        timerDuration = timer.duration;
+        $taskQueue[0].timer.addEventListener(
+            TimerTickEvent.type,
+            handleTimerTick
+        );
+        $taskQueue[0].timer.addEventListener(
+            TimerFinishEvent.type,
+            handleTimerFinish
+        );
 
-        switch ($pomodoroState.tasks[0].typ) {
+        switch ($taskQueue[0].type) {
             case TaskType.WORK:
-                $settingsState.autoStartSession ?? timer.start();
+                $settingsState.autoStartSession ?? $taskQueue[0].timer.start();
                 break;
             case TaskType.BREAK:
-                $settingsState.autoStartBreak ?? timer.start();
+                $settingsState.autoStartBreak ?? $taskQueue[0].timer.start();
                 break;
         }
     }
 
-    let timer = new Timer(1 * 1000);
-    timer.addEventListener(TimerTickEvent.type, handleTimerTick);
-    timer.addEventListener(TimerFinishEvent.type, handleTimerFinish);
-
     function toggleSession() {
-        if (finished && $pomodoroState.tasks.length > 0) {
-            timer.duration = $pomodoroState.tasks[0].duration;
-            timerDuration = timer.duration;
-            finished = false;
+        if (paused && $taskQueue.length > 0) {
             paused = false;
-            timer.start();
+            if (!$taskQueue[0].timer.isStarted()) {
+                $taskQueue[0].timer.addEventListener(
+                    TimerTickEvent.type,
+                    handleTimerTick
+                );
+                $taskQueue[0].timer.addEventListener(
+                    TimerFinishEvent.type,
+                    handleTimerFinish
+                );
+            }
+
+            $taskQueue[0].timer.start();
             return;
         }
 
-        if (paused) {
-            timer.start();
-            paused = false;
-            return;
-        }
-
-        if ($pomodoroState.tasks[0].pausable) {
-            timer.pause();
+        if (!paused && $taskQueue[0].pausable) {
             paused = true;
+            $taskQueue[0].timer.pause();
         }
     }
 
     function cancelTask() {
         paused = true;
-        timer.reset();
-        timer.duration = $pomodoroState.tasks[0].duration;
-        timerDuration = timer.duration;
+        $taskQueue[0].timer.reset();
     }
 
-    $: normalizedRadius = radius - stroke * 2;
-    $: circumference = normalizedRadius * 2 * Math.PI;
-    $: strokeDashOffset =
-        timerDuration > 0
-            ? circumference -
-              (((timerElapsed / timerDuration) * 100) / 100) * circumference
-            : 0;
-
     function getDisplayTime(ms: number) {
-        if (timerDuration == 0 || ms <= 0) {
+        if (ms <= 0) {
             return "--";
         }
 
-        // get hours from minutes
         const hours = ms / (60 * 60 * 1000);
         const absoluteHours = Math.floor(hours);
         const h = absoluteHours > 9 ? absoluteHours : "0" + absoluteHours;
@@ -119,7 +124,10 @@
 
     // remove the trailing milliseconds which are not required to display
     $: fixedElapsed = Math.floor(timerElapsed / 100) * 100;
-    $: display = getDisplayTime(timerDuration - fixedElapsed);
+    $: display =
+        $taskQueue.length == 0
+            ? "--"
+            : getDisplayTime($taskQueue[0].duration - fixedElapsed);
 </script>
 
 <div class="flex items-center justify-center flex-col gap-8 w-full h-full">

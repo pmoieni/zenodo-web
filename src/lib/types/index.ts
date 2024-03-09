@@ -1,3 +1,5 @@
+import type { Timer } from "../core/timer";
+
 export type RGB = `rgb(${number}, ${number}, ${number})`;
 export type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
 export type HEX = `#${string}`;
@@ -29,7 +31,8 @@ export enum TaskPriority {
 
 export interface Task {
     title: string;
-    typ: TaskType;
+    type: TaskType;
+    timer: Timer;
     duration: number;
     priority: TaskPriority;
     pausable: boolean;

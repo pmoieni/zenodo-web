@@ -1,7 +1,8 @@
 <script lang="ts">
+    import { Timer } from "../../core/timer";
     import { appState } from "../../store/app";
-    import { pomodoroState } from "../../store/pomodoro";
-    import { TaskType, TaskPriority, type Task } from "../../types";
+    import { taskQueue } from "../../store/pomodoro";
+    import { TaskType, TaskPriority } from "../../types";
     import Modal from "../Modal.svelte";
     import NumberInput from "../NumberInput.svelte";
     import Select from "../Select.svelte";
@@ -19,22 +20,23 @@
         [TaskPriority.HIGH]: "high",
     };
 
-    let newTask: Task = {
-        title: "",
-        typ: TaskType.WORK,
-        duration: 0,
-        priority: TaskPriority.MEDIUM,
-        pausable: true,
-    };
+    let title = "";
+    let type = TaskType.WORK;
+    let duration = 0;
+    let priority = TaskPriority.MEDIUM;
+    let pausable = true;
 
     function addTask() {
-        $pomodoroState.tasks.push({
-            ...newTask,
-            duration: newTask.duration * 60 * 1000,
+        $taskQueue.push({
+            title,
+            type,
+            priority,
+            pausable,
+            duration: duration * 60 * 1000,
+            timer: new Timer(duration * 60 * 1000, 1 * 1000),
         });
 
-        // why? because svelte is stupid
-        $pomodoroState = $pomodoroState;
+        $taskQueue = $taskQueue;
 
         $appState.windows.newTaskModalOpen = false;
         $appState = $appState;
@@ -48,25 +50,25 @@
             <div class="w-full flex items-center gap-2">
                 <TextInput
                     name="task title"
-                    bind:value={newTask.title}
+                    bind:value={title}
                     example="watch movie" />
             </div>
             <div class="w-full flex items-center gap-2">
                 <Select
                     name="task type"
                     options={Object.keys(taskTypes)}
-                    bind:value={newTask.typ}
+                    bind:value={type}
                     display={(o) => o} />
                 <Select
                     name="task priority"
                     options={Object.keys(taskPriorities)}
-                    bind:value={newTask.priority}
+                    bind:value={priority}
                     display={(o) => o} />
             </div>
             <div class="w-full">
                 <NumberInput
                     name="minutes"
-                    bind:value={newTask.duration}
+                    bind:value={duration}
                     example={30}
                     classes="w-full md:w-24 lg:w-28" />
             </div>
