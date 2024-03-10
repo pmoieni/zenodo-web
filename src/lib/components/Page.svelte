@@ -3,6 +3,6 @@
     export { classes as class };
 </script>
 
-<div class="w-full h-full bg-zinc-200 dark:bg-zinc-800 {classes}">
+<div class="w-full h-full bg-base-100 {classes}">
     <slot />
 </div>

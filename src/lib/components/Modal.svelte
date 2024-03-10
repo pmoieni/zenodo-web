@@ -1,28 +1,32 @@
 <script lang="ts">
-    import TextButton from "./TextButton.svelte";
-
-    export let open = false;
-
-    function close() {
-        open = false;
+    interface ModalAction {
+        name: string;
+        func?: () => void;
+        disabled?: boolean;
+        isPrimary: boolean;
     }
+
+    export let open: boolean = false;
+    export let actions: ModalAction[] = [];
 </script>
 
-{#if open}
-    <button
-        on:click|self={close}
-        class="w-full h-full border-none outline-none flex items-center justify-center bg-zinc-700 bg-opacity-30 absolute top-0 left-0">
-        <div
-            class="w-full h-full md:w-auto md:h-auto md:max-w-[80%] md:max-h-[80%] flex flex-col items-center bg-zinc-200 dark:bg-zinc-800 md:rounded-lg overflow-hidden">
-            <div class="w-full h-full overflow-auto">
-                <slot />
-            </div>
-            <div class="p-2 w-full">
-                <TextButton
-                    class="w-full"
-                    on:click={close}
-                    text="Close" />
-            </div>
+<dialog
+    class:modal-open={open}
+    class="modal modal-bottom md:modal-middle">
+    <div class="modal-box">
+        <slot />
+        <div class="modal-action">
+            <form method="dialog">
+                {#each actions as action}
+                    <button
+                        disabled={action.disabled}
+                        class="btn {action.isPrimary ? 'btn-primary' : ''}"
+                        on:click={action.func}>{action.name}</button>
+                {/each}
+                <button
+                    class="btn"
+                    on:click={() => (open = false)}>Close</button>
+            </form>
         </div>
-    </button>
-{/if}
+    </div>
+</dialog>

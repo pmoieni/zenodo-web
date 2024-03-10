@@ -1,40 +1,60 @@
 <script lang="ts">
-    import { appState } from "../../store/app";
     import { settingsState } from "../../store/settings";
     import Modal from "../Modal.svelte";
-    import NumberInput from "../NumberInput.svelte";
     import ToggleButton from "../ToggleButton.svelte";
+    import { appState } from "../../store/app";
+    import Range from "../Range.svelte";
 </script>
 
 <Modal open={$appState.windows.settingsOpen}>
-    <div
-        class="w-full h-full overflow-auto p-4 flex flex-col items-center justify-start">
-        <div class="w-full flex flex-col items-start justify-start mb-4 mt-4">
-            <h2 class="text-lg text-gray-700 dark:text-gray-400 mb-2">
-                break duration
-            </h2>
-            <div class="w-full">
-                <NumberInput
-                    name="minutes"
-                    bind:value={$settingsState.breakDuration}
-                    example={25}
-                    classes="w-full" />
+    <div class="w-full h-full overflow-auto flex flex-col justify-start gap-4">
+        <Range
+            title="Break Duration"
+            bind:value={$settingsState.breakDuration}
+            min={5}
+            max={30}
+            step={5}
+            labelSuffix="m" />
+        <div class="w-full flex flex-col items-start justify-start">
+            <h2 class="text-lg">more settings</h2>
+            <div>
+                <div class="label">
+                    <span class="label-text">auto start next break</span>
+                </div>
+                <input
+                    type="checkbox"
+                    checked={$settingsState.autoStartSession}
+                    on:change={() => {
+                        $settingsState.autoStartSession =
+                            !$settingsState.autoStartSession;
+                    }}
+                    class="toggle" />
             </div>
-        </div>
-        <div class="w-full flex flex-col items-start justify-start mb-4 mt-4">
-            <h2 class="text-lg text-gray-700 dark:text-gray-400 mb-2">
-                more settings
-            </h2>
-            <div class="w-full flex flex-col items-center justify-start gap-4">
-                <ToggleButton
-                    description="auto start next session"
-                    bind:value={$settingsState.autoStartSession} />
-                <ToggleButton
-                    description="auto start next break"
-                    bind:value={$settingsState.autoStartBreak} />
-                <ToggleButton
-                    description="enable dark theme"
-                    bind:value={$settingsState.darkTheme} />
+
+            <div>
+                <div class="label">
+                    <span class="label-text">auto start next break</span>
+                </div>
+                <input
+                    type="checkbox"
+                    checked={$settingsState.autoStartBreak}
+                    on:change={() => {
+                        $settingsState.autoStartBreak =
+                            !$settingsState.autoStartBreak;
+                    }}
+                    class="toggle" />
+            </div>
+            <div>
+                <div class="label">
+                    <span class="label-text">enable dark theme</span>
+                </div>
+                <input
+                    type="checkbox"
+                    checked={$settingsState.darkTheme}
+                    on:change={() => {
+                        $settingsState.darkTheme = !$settingsState.darkTheme;
+                    }}
+                    class="toggle theme-controller" />
             </div>
         </div>
     </div>

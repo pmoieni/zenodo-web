@@ -1,13 +1,15 @@
 interface TimerState {
     startTime: number;
-    resumeTime: number;
+    pauseTime: number;
+    totalPause: number;
     duration: number;
     elapsed: number;
 }
 
-export const timerDefaultState = {
+export const timerDefaultState: TimerState = {
     startTime: -1,
-    resumeTime: -1,
+    pauseTime: -1,
+    totalPause: 0,
     duration: 0,
     elapsed: 0,
 };
@@ -50,22 +52,16 @@ export class Timer extends EventTarget {
     }
 
     private elapsedSinceStart() {
-        if (this.state.startTime === -1) {
+        if (this.state.startTime == -1) {
             return 0;
         }
 
         return Date.now() - this.state.startTime;
     }
 
-    private elapsedSinceLastResume() {
-        if (this.state.resumeTime === -1) {
-            return 0;
-        }
-
-        return Date.now() - this.state.resumeTime;
-    }
-
     private run() {
+        this.isRunning = true;
+
         let expected = Date.now() + this.interval;
 
         const step = () => {
@@ -73,8 +69,6 @@ export class Timer extends EventTarget {
 
             // timer finished
             if (now - (this.state.startTime + this.state.duration) >= 0) {
-                this.reset();
-
                 this.dispatchEvent(new TimerFinishEvent(this.state));
                 return;
             }
@@ -85,7 +79,8 @@ export class Timer extends EventTarget {
                 expected += this.interval * Math.floor(delta / this.interval);
             }
 
-            this.state.elapsed = this.elapsedSinceStart();
+            this.state.elapsed =
+                this.elapsedSinceStart() - this.state.totalPause;
 
             expected += this.interval;
             this.timeoutID = window.setTimeout(
@@ -112,12 +107,15 @@ export class Timer extends EventTarget {
             return;
         }
 
+        const now = Date.now();
+
         this.state = {
             ...this.state,
-            startTime:
-                this.state.startTime == -1 ? Date.now() : this.state.startTime,
-            elapsed: this.state.elapsed + this.elapsedSinceLastResume(),
-            resumeTime: Date.now(),
+            startTime: this.state.startTime == -1 ? now : this.state.startTime,
+            totalPause:
+                this.state.pauseTime == -1
+                    ? 0
+                    : this.state.totalPause + (now - this.state.pauseTime),
         };
 
         this.run();
@@ -132,23 +130,16 @@ export class Timer extends EventTarget {
             return;
         }
 
-        this.isRunning = false;
-
         window.clearTimeout(this.timeoutID);
-
+        this.state.pauseTime = Date.now();
+        this.isRunning = false;
         this.dispatchEvent(new TimerTickEvent(this.state));
     }
 
     reset() {
         window.clearTimeout(this.timeoutID);
-
-        this.state = {
-            elapsed: 0,
-            duration: 0,
-            startTime: -1,
-            resumeTime: -1,
-        };
-
+        this.state = timerDefaultState;
+        this.isRunning = false;
         this.dispatchEvent(new TimerTickEvent(this.state));
     }
 }

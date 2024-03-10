@@ -30,7 +30,9 @@
         content="#ffffff" />
 </svelte:head>
 
-<main class="{$settingsState.darkTheme ? 'dark' : ''} w-screen h-screen">
+<main
+    data-theme={$settingsState.darkTheme ? "dark" : "light"}
+    class="w-screen h-screen">
     <Home />
 </main>
 

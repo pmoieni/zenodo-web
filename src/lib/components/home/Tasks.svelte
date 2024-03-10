@@ -1,28 +1,61 @@
 <script lang="ts">
     import { appState } from "../../store/app";
     import { taskQueue } from "../../store/pomodoro";
-    import TextButton from "../TextButton.svelte";
+    import PlusIcon from "../icons/PlusIcon.svelte";
     import NewTask from "./NewTask.svelte";
-    import TaskCard from "./TaskCard.svelte";
 
     function openNewTaskModal() {
         $appState.windows.newTaskModalOpen = true;
     }
 </script>
 
-<div class="p-2 w-3/5 h-full flex flex-col gap-2">
-    <ul
-        class="p-2 bg-zinc-300 dark:bg-zinc-700 rounded-lg gap-2 flex flex-col items-center">
+<div
+    class="p-4 bg-base-300 transition-all fixed {!$appState.windows.tasks
+        ? 'hidden'
+        : 'block'} w-full h-full flex flex-col md:block md:static md:top-0 md:w-3/5">
+    <div class="w-full h-full flex items-start justify-center">
         {#if $taskQueue.length == 0}
-            <p class="text-gray-900 dark:text-gray-300">No task available</p>
+            <p class="text-2xl h-full flex items-center justify-center">
+                No task available
+            </p>
         {:else}
-            {#each $taskQueue as task}
-                <TaskCard {task} />
-            {/each}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Priority</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each $taskQueue as task, idx}
+                        <tr>
+                            <th>{idx + 1}</th>
+                            <td>{task.title}</td>
+                            <td>{task.type}</td>
+                            <td>{task.duration / (60 * 1000)}m</td>
+                            <td
+                                ><div class="badge">
+                                    {task.priority}
+                                </div></td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
         {/if}
-    </ul>
-    <TextButton
-        text="+ New task"
-        on:click={openNewTaskModal} />
+    </div>
+    <button
+        class="btn btn-primary"
+        on:click={openNewTaskModal}>
+        <PlusIcon />
+        New Task
+    </button>
+    <button
+        class="btn md:hidden"
+        on:click={() => ($appState.windows.tasks = false)}>
+        Close
+    </button>
 </div>
 <NewTask />

@@ -4,10 +4,8 @@
     import { taskQueue } from "../../store/pomodoro";
     import { TaskType, TaskPriority } from "../../types";
     import Modal from "../Modal.svelte";
-    import NumberInput from "../NumberInput.svelte";
+    import Range from "../Range.svelte";
     import Select from "../Select.svelte";
-    import TextButton from "../TextButton.svelte";
-    import TextInput from "../TextInput.svelte";
 
     const taskTypes: Record<TaskType, string> = {
         [TaskType.WORK]: "work",
@@ -43,41 +41,54 @@
     }
 </script>
 
-<Modal open={$appState.windows.newTaskModalOpen}>
-    <div class="w-full flex flex-col items-center justify-start">
-        <div
-            class="p-4 w-full flex flex-col items-center justify-between gap-6">
-            <div class="w-full flex items-center gap-2">
-                <TextInput
-                    name="task title"
+<Modal
+    open={$appState.windows.newTaskModalOpen}
+    actions={[
+        {
+            name: "Add Task",
+            func: addTask,
+            disabled: title.length == 0,
+            isPrimary: true,
+        },
+    ]}>
+    <div class="w-full flex flex-col items-center justify-between gap-6">
+        <div class="w-full flex items-center gap-2">
+            <label class="form-control w-full max-w-xs">
+                <div class="label">
+                    <span class="label-text">Task Title</span>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Example: study math"
                     bind:value={title}
-                    example="watch movie" />
-            </div>
-            <div class="w-full flex items-center gap-2">
-                <Select
-                    name="task type"
-                    options={Object.keys(taskTypes)}
-                    bind:value={type}
-                    display={(o) => o} />
-                <Select
-                    name="task priority"
-                    options={Object.keys(taskPriorities)}
-                    bind:value={priority}
-                    display={(o) => o} />
-            </div>
-            <div class="w-full">
-                <NumberInput
-                    name="minutes"
-                    bind:value={duration}
-                    example={30}
-                    classes="w-full md:w-24 lg:w-28" />
-            </div>
+                    class="input input-bordered w-full max-w-xs" />
+                {#if title.length == 0}
+                    <div class="label">
+                        <span class="label-text text-error">invalid title</span>
+                    </div>
+                {/if}
+            </label>
         </div>
-        <div class="w-full px-2">
-            <TextButton
-                on:click={addTask}
-                class="w-full"
-                text="Add Task" />
+        <div class="w-full flex items-center gap-2">
+            <Select
+                name="Task Type"
+                options={Object.keys(taskTypes)}
+                bind:value={type}
+                display={(o) => o} />
+            <Select
+                name="Task Priority"
+                options={Object.keys(taskPriorities)}
+                bind:value={priority}
+                display={(o) => o} />
+        </div>
+        <div class="w-full">
+            <Range
+                title="Task Duration"
+                min={15}
+                max={150}
+                step={15}
+                bind:value={duration}
+                labelSuffix="m" />
         </div>
     </div>
 </Modal>

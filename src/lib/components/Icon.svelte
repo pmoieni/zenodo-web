@@ -12,6 +12,7 @@
 </script>
 
 {#if src}
+    <svg></svg>
     <img
         class="block dark:invert"
         style={`width: ${size};
