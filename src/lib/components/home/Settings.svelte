@@ -1,12 +1,10 @@
 <script lang="ts">
     import { settingsState } from "../../store/settings";
     import Modal from "../Modal.svelte";
-    import ToggleButton from "../ToggleButton.svelte";
-    import { appState } from "../../store/app";
     import Range from "../Range.svelte";
 </script>
 
-<Modal open={$appState.windows.settingsOpen}>
+<Modal id="SettingsModal">
     <div class="w-full h-full overflow-auto flex flex-col justify-start gap-4">
         <Range
             title="Break Duration"

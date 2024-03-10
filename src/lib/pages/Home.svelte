@@ -5,13 +5,11 @@
     import Page from "../components/Page.svelte";
     import Tasks from "../components/home/Tasks.svelte";
     import CogIcon from "../components/icons/CogIcon.svelte";
-
-    function openSettings() {
-        $appState.windows.settingsOpen = true;
-    }
+    import { getModal } from "../components/Modal.svelte";
 
     function openTasks() {
         $appState.windows.tasks = true;
+        $appState = $appState;
     }
 </script>
 
@@ -24,7 +22,7 @@
     <div class="w-full p-4 flex items-center justify-between">
         <button
             class="btn btn-circle"
-            on:click={openSettings}>
+            on:click={getModal("SettingsModal")?.open}>
             <CogIcon />
         </button>
         <button

@@ -42,7 +42,7 @@
 </script>
 
 <Modal
-    open={$appState.windows.newTaskModalOpen}
+    id="NewTaskModal"
     actions={[
         {
             name: "Add Task",
