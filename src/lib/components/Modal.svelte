@@ -17,9 +17,10 @@
 <script lang="ts">
     interface ModalAction {
         name: string;
-        func?: () => void;
-        disabled?: boolean;
+        func: () => void;
+        disabled: boolean;
         isPrimary: boolean;
+        closeOnCall: boolean;
     }
 
     let dialog: HTMLDialogElement;
@@ -48,7 +49,10 @@
                 <button
                     disabled={action.disabled}
                     class="btn {action.isPrimary ? 'btn-primary' : ''}"
-                    on:click={action.func}>{action.name}</button>
+                    on:click={() => {
+                        action.func();
+                        action.closeOnCall && dialog.close();
+                    }}>{action.name}</button>
             {/each}
         </div>
     </div>

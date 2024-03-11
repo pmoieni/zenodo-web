@@ -1,6 +1,5 @@
 <script lang="ts">
     import { Timer } from "../../core/timer";
-    import { appState } from "../../store/app";
     import { taskQueue } from "../../store/pomodoro";
     import { TaskType, TaskPriority } from "../../types";
     import Modal from "../Modal.svelte";
@@ -24,9 +23,28 @@
     let priority = TaskPriority.MEDIUM;
     let pausable = true;
 
+    let wrongTitleText = "invalid title";
+    let disableAddButton = true;
+
+    function validateTitle() {
+        const trimmed = title.trim();
+
+        if (!title.trim().length) {
+            wrongTitleText = "title is required";
+            disableAddButton = true;
+            return;
+        } else if (trimmed.length > 12) {
+            wrongTitleText = "title too long";
+            disableAddButton = true;
+            return;
+        }
+
+        disableAddButton = false;
+    }
+
     function addTask() {
         $taskQueue.push({
-            title,
+            title: title.trim(),
             type,
             priority,
             pausable,
@@ -35,9 +53,6 @@
         });
 
         $taskQueue = $taskQueue;
-
-        $appState.windows.newTaskModalOpen = false;
-        $appState = $appState;
     }
 </script>
 
@@ -47,8 +62,9 @@
         {
             name: "Add Task",
             func: addTask,
-            disabled: title.length == 0,
+            disabled: disableAddButton,
             isPrimary: true,
+            closeOnCall: true,
         },
     ]}>
     <div class="w-full flex flex-col items-center justify-between gap-6">
@@ -61,10 +77,12 @@
                     type="text"
                     placeholder="Example: study math"
                     bind:value={title}
+                    on:input={validateTitle}
                     class="input input-bordered w-full max-w-xs" />
-                {#if title.length == 0}
+                {#if disableAddButton}
                     <div class="label">
-                        <span class="label-text text-error">invalid title</span>
+                        <span class="label-text text-error"
+                            >{wrongTitleText}</span>
                     </div>
                 {/if}
             </label>
