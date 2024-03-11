@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Timer } from "../../core/timer";
     import { taskQueue } from "../../store/pomodoro";
+    import { settingsState } from "../../store/settings";
     import { TaskType, TaskPriority } from "../../types";
     import Modal from "../Modal.svelte";
     import Range from "../Range.svelte";
@@ -51,6 +52,23 @@
             duration: duration * 60 * 1000,
             timer: new Timer(duration * 60 * 1000, 1 * 1000),
         });
+
+        if ($settingsState.breakBetweenSessions) {
+            $taskQueue.push({
+                duration: $settingsState.breakDuration * 60 * 1000,
+                timer: new Timer(
+                    $settingsState.breakDuration * 60 * 1000,
+                    1 * 1000
+                ),
+                pausable: true,
+            });
+        }
+
+        title = "";
+        type = TaskType.WORK;
+        duration = 0;
+        priority = TaskPriority.MEDIUM;
+        pausable = true;
 
         $taskQueue = $taskQueue;
     }

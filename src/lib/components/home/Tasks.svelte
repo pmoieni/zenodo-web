@@ -15,7 +15,7 @@
         Tasks
     </div>
     <div
-        class="dropdown-content mb-2 z-[1] flex flex-col bg-base-200 p-4 min-w-24 rounded-xl drop-shadow-sm">
+        class="dropdown-content mb-2 z-[1] flex flex-col bg-base-200 p-4 rounded-xl drop-shadow-sm gap-4">
         {#if $taskQueue.length == 0}
             <div class="w-10 h-10">
                 <p>No task available</p>
@@ -33,16 +33,27 @@
                 </thead>
                 <tbody>
                     {#each $taskQueue as task, idx}
-                        <tr>
+                        {#if "title" in task}
+                            <tr>
+                                <th>{idx + 1}</th>
+                                <td>{task.title}</td>
+                                <td>{task.type}</td>
+                                <td>{task.duration / (60 * 1000)}m</td>
+                                <td
+                                    ><div class="badge">
+                                        {task.priority}
+                                    </div></td>
+                            </tr>
+                        {:else}
                             <th>{idx + 1}</th>
-                            <td>{task.title}</td>
-                            <td>{task.type}</td>
-                            <td>{task.duration / (60 * 1000)}m</td>
                             <td
-                                ><div class="badge">
-                                    {task.priority}
-                                </div></td>
-                        </tr>
+                                colspan="4"
+                                class="bg-secondary text-secondary-content">
+                                <div class="w-full h-full text-center">
+                                    {task.duration / (60 * 1000)} minutes of break
+                                </div>
+                            </td>
+                        {/if}
                     {/each}
                 </tbody>
             </table>

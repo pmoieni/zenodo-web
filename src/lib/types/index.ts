@@ -29,11 +29,14 @@ export enum TaskPriority {
     HIGH = "high",
 }
 
-export interface Task {
-    title: string;
-    type: TaskType;
+export interface QueueItem {
     timer: Timer;
     duration: number;
-    priority: TaskPriority;
     pausable: boolean;
+}
+
+export interface Task extends QueueItem {
+    title: string;
+    type: TaskType;
+    priority: TaskPriority;
 }

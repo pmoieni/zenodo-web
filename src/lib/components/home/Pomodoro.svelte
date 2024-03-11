@@ -52,10 +52,10 @@
 
         switch ($taskQueue[0].type) {
             case TaskType.WORK:
-                $settingsState.autoStartSession ?? $taskQueue[0].timer.start();
+                $settingsState.autoStartSession && $taskQueue[0].timer.start();
                 break;
             case TaskType.BREAK:
-                $settingsState.autoStartBreak ?? $taskQueue[0].timer.start();
+                $settingsState.autoStartBreak && $taskQueue[0].timer.start();
                 break;
         }
     }
@@ -115,14 +115,14 @@
 
 <div class="flex items-center justify-center flex-col gap-8 w-full h-full">
     <div
-        class="radial-progress bg-primary text-primary-content border-8 border-primary"
+        class="radial-progress bg-primary text-2xl text-primary-content border-8 border-primary relative"
         style="--value: {timerProgress}; --size: 15rem; --thickness: {timerProgress ==
         0
             ? '0'
             : '1'}rem;"
         role="progressbar">
         {#if displayTime}
-            <span class="countdown font-mono text-2xl">
+            <span class="countdown font-mono">
                 <span style="--value:{displayTime.hours};"></span>h
                 <span style="--value:{displayTime.minutes};"></span>m
                 <span style="--value:{displayTime.seconds};"></span>s
@@ -148,4 +148,27 @@
             <CancelIcon />
         </button>
     </div>
+    {#if displayTime}
+        <table class="table w-full sm:max-w-16">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Duration</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{$taskQueue[0].title}</td>
+                    <td>{$taskQueue[0].type}</td>
+                    <td>{$taskQueue[0].duration / (60 * 1000)}m</td>
+                    <td
+                        ><div class="badge">
+                            {$taskQueue[0].priority}
+                        </div></td>
+                </tr>
+            </tbody>
+        </table>
+    {/if}
 </div>

@@ -28,7 +28,6 @@
                     }}
                     class="toggle" />
             </div>
-
             <div>
                 <div class="label">
                     <span class="label-text">auto start next break</span>
@@ -39,6 +38,19 @@
                     on:change={() => {
                         $settingsState.autoStartBreak =
                             !$settingsState.autoStartBreak;
+                    }}
+                    class="toggle" />
+            </div>
+            <div>
+                <div class="label">
+                    <span class="label-text">break between sessions</span>
+                </div>
+                <input
+                    type="checkbox"
+                    checked={$settingsState.breakBetweenSessions}
+                    on:change={() => {
+                        $settingsState.breakBetweenSessions =
+                            !$settingsState.breakBetweenSessions;
                     }}
                     class="toggle" />
             </div>
