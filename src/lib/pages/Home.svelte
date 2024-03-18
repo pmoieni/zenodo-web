@@ -1,10 +1,10 @@
 <script lang="ts">
-    import Pomodoro from "../components/home/Pomodoro.svelte";
-    import Settings from "../components/home/Settings.svelte";
-    import Page from "../components/Page.svelte";
-    import Tasks from "../components/home/Tasks.svelte";
+    import { getModal } from "../components/components/base/Modal.svelte";
+    import Page from "../components/components/base/Page.svelte";
+    import Pomodoro from "../components/components/home/Pomodoro.svelte";
+    import Settings from "../components/components/home/Settings.svelte";
+    import Tasks from "../components/components/home/Tasks.svelte";
     import CogIcon from "../components/icons/CogIcon.svelte";
-    import { getModal } from "../components/Modal.svelte";
 </script>
 
 <Page class="flex flex-col items-center justify-between">

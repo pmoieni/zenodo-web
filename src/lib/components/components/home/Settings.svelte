@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { settingsState } from "../../store/settings";
-    import Modal from "../Modal.svelte";
-    import Range from "../Range.svelte";
+    import { settingsState } from "../../../store/settings";
+    import Modal from "../base/Modal.svelte";
+    import Range from "../base/Range.svelte";
 </script>
 
 <Modal id="SettingsModal">
@@ -17,7 +17,7 @@
             <h2 class="text-lg">more settings</h2>
             <div>
                 <div class="label">
-                    <span class="label-text">auto start next break</span>
+                    <span class="label-text">auto start next session</span>
                 </div>
                 <input
                     type="checkbox"

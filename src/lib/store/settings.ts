@@ -1,4 +1,4 @@
-import { createStorage } from ".";
+import { createStore } from "./store";
 
 export interface SettingsState {
     breakDuration: number;
@@ -12,7 +12,7 @@ function getOSTheme(): boolean {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-export const settingsState = createStorage<SettingsState>("SETTINGS_STORE", {
+export const settingsState = createStore<SettingsState>("SETTINGS_STORE", {
     breakDuration: 5,
     autoStartSession: false,
     autoStartBreak: false,
