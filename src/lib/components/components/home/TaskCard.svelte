@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { TaskPriority, type ITask } from "../../../core/queue";
+    import { type ITask } from "../../../core/queue";
 
     export let task: ITask;
 </script>
@@ -12,9 +12,9 @@
         </p>
         <p
             class="px-2 py-1 rounded-lg text-sm font-bold text-gray-900 dark:text-gray-300 {task
-                .info.priority === TaskPriority.LOW
+                .info.priority === 'low'
                 ? 'bg-green-400 dark:bg-green-700'
-                : task.info.priority === TaskPriority.MEDIUM
+                : task.info.priority === 'medium'
                   ? 'bg-yellow-400 dark:bg-yellow-700'
                   : 'bg-red-400 dark:bg-red-700'}">
             {task.info.priority}

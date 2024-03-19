@@ -16,7 +16,7 @@
 
     let title = "";
     let type: TaskType = "work";
-    let duration = 1;
+    let duration = 15;
     let priority: TaskPriority = "medium";
     let pausable = true;
     let cancelable = true;
@@ -43,7 +43,7 @@
     function resetInput() {
         title = "";
         type = "work";
-        duration = 1;
+        duration = 15;
         priority = "medium";
         pausable = true;
         cancelable = true;
@@ -90,8 +90,19 @@
             onFinish
         );
 
+        const taskBreak = createTask(
+            {
+                type: "break",
+                pausable: true,
+                cancelable: true,
+            },
+            5 * 60 * 1000,
+            1 * 1000,
+            onFinish
+        );
+
         _queue.update((v) => {
-            v.push(task);
+            v.push(task, taskBreak);
             return v;
         });
 
@@ -145,9 +156,9 @@
         <div class="w-full">
             <Range
                 title="Task Duration"
-                min={1}
-                max={5}
-                step={1}
+                min={15}
+                max={150}
+                step={15}
                 bind:value={duration}
                 labelSuffix="m" />
         </div>

@@ -87,15 +87,22 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>{$currentTask.info.title}</td>
-                    <td>{$currentTask.info.type}</td>
-                    <td>{$currentTask.duration / (60 * 1000)}m</td>
-                    <td
-                        ><div class="badge">
-                            {$currentTask.info.priority}
-                        </div></td>
-                </tr>
+                {#if $currentTask.info.type === "work"}
+                    <tr>
+                        <td>{$currentTask.info.title}</td>
+                        <td>{$currentTask.info.type}</td>
+                        <td>{$currentTask.duration / (60 * 1000)}m</td>
+                        <td
+                            ><div class="badge">
+                                {$currentTask.info.priority}
+                            </div></td>
+                    </tr>
+                {:else}
+                    <tr class="bg-secondary text-secondary-content">
+                        <td colspan="4"
+                            >{$currentTask.duration / (60 * 1000)} minutes of break</td>
+                    </tr>
+                {/if}
             </tbody>
         </table>
     {/if}

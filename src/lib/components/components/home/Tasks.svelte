@@ -35,16 +35,25 @@
                 <tbody>
                     {#each $_queue as task, idx}
                         <!-- TODO: can't use `$` sign here -->
-                        <tr>
-                            <th>{idx + 1}</th>
-                            <td>{get(task).info.title}</td>
-                            <td>{get(task).info.type}</td>
-                            <td>{get(task).duration / (60 * 1000)}m</td>
-                            <td
-                                ><div class="badge">
-                                    {get(task).info.priority}
-                                </div></td>
-                        </tr>
+                        {#if get(task).info.type === "work"}
+                            <tr>
+                                <th>{idx + 1}</th>
+                                <td>{get(task).info.title}</td>
+                                <td>{get(task).info.type}</td>
+                                <td>{get(task).duration / (60 * 1000)}m</td>
+                                <td
+                                    ><div class="badge">
+                                        {get(task).info.priority}
+                                    </div></td>
+                            </tr>
+                        {:else}
+                            <tr class="bg-secondary text-secondary-content">
+                                <th>{idx + 1}</th>
+                                <td colspan="4"
+                                    >{get(task).duration / (60 * 1000)} minutes of
+                                    break</td>
+                            </tr>
+                        {/if}
                     {/each}
                 </tbody>
             </table>
