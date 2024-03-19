@@ -98,8 +98,10 @@
                             </div></td>
                     </tr>
                 {:else}
-                    <tr class="bg-secondary text-secondary-content">
-                        <td colspan="4"
+                    <tr>
+                        <td
+                            class="bg-secondary text-secondary-content text-center"
+                            colspan="4"
                             >{$currentTask.duration / (60 * 1000)} minutes of break</td>
                     </tr>
                 {/if}
